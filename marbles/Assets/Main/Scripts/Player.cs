@@ -1,24 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.IMGUI.Controls.CapsuleBoundsHandle;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class Player : MonoBehaviour
 {
 
     [SerializeField]
-    Transform playerInputSpace = default, ball = default;
+    Transform playerInputSpace = default, visualRepresentation = default;
 
     [SerializeField, Range(0f, 100f)]
-    float maxSpeed = 10f, maxSnapSpeed = 5f;
+    float maxForwardSpeed = 10f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;
 
     [SerializeField, Range(0f, 100f)]
     float maxAcceleration = 10f, maxAirAcceleration = 1f;
-
-    [SerializeField, Range(0f, 10f)]
-    float jumpHeight = 2f;
-
-    [SerializeField, Range(0, 5)]
-    int maxAirJumps = 0;
 
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -36,25 +32,23 @@ public class Player : MonoBehaviour
     float ballRadius = 0.5f;
 
     Vector3 velocity, connectionVelocity;
-    Vector3 playerInput;
+    float playerInput;
     Vector3 acceleration;
     float maxSpeedChange;
     Rigidbody body, connectedBody, previousConnectedBody;
 
     int groundContactCount, steepContactCount;
 
-    bool desiredJump;
     bool OnGround => groundContactCount > 0;
 
     bool OnSteep => steepContactCount > 0;
 
-    int jumpPhase;
     float minGroundDotProduct, minStairsDotProduct;
 
     Vector3 contactNormal, steepNormal;
-    int stepsSinceLastGrounded, stepsSinceLastJump;
+    int stepsSinceLastGrounded;
 
-    Vector3 upAxis, rightAxis, forwardAxis;
+    Vector3 upAxis;
     Vector3 connectionWorldPosition, connectionLocalPosition;
 
     MeshRenderer meshRenderer;
@@ -65,7 +59,7 @@ public class Player : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         body.useGravity = false;
-        meshRenderer = ball.GetComponent<MeshRenderer>();
+        meshRenderer = visualRepresentation.GetComponent<MeshRenderer>();
         OnValidate();
     }
 
@@ -77,43 +71,20 @@ public class Player : MonoBehaviour
 
     public void Update()
     {
-        playerInput.x = 0f;
-        playerInput.z = 0f;
-
-        playerInput.x = Input.GetAxis("Horizontal");
-        playerInput.z = Input.GetAxis("Vertical");
-
-        playerInput = Vector3.ClampMagnitude(playerInput, 1f);
-
-        if (playerInputSpace)
-        {
-            rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, upAxis);
-            forwardAxis = ProjectDirectionOnPlane(playerInputSpace.forward, upAxis);
-        }
-        else
-        {
-            rightAxis = ProjectDirectionOnPlane(Vector3.right, upAxis);
-            forwardAxis = ProjectDirectionOnPlane(Vector3.forward, upAxis);
-        }
-
-        desiredJump |= Input.GetKeyDown(KeyCode.Space);
+        playerInput = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
 
         UpdateBall();
     }
 
     private void FixedUpdate()
     {
-        upAxis = -Physics.gravity.normalized;
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
+
+        // Rotate ball, so that it always aligns with the track
+        transform.rotation = Quaternion.LookRotation(transform.forward, upAxis);
 
         UpdateState();
         AdjustVelocity();
-
-        if (desiredJump)
-        {
-            desiredJump = false;
-            Jump(gravity);
-        }
 
         if (OnGround && velocity.sqrMagnitude < 0.01f)
         {
@@ -135,17 +106,10 @@ public class Player : MonoBehaviour
 
         meshRenderer.material = ballMaterial;
 
-        Vector3 movement = body.velocity * Time.deltaTime;
-        float distance = movement.magnitude;
+        float forwardMovement = body.velocity.z * Time.deltaTime;
 
-        if (distance < 0.001f)
-        {
-            return;
-        }
-        float angle = distance * (180f / Mathf.PI) / ballRadius;
-
-        Vector3 rotationAxis = Vector3.Cross(lastContactNormal, movement).normalized;
-        ball.localRotation = Quaternion.Euler(rotationAxis * angle) * ball.localRotation;
+        float angle = forwardMovement * (180f / Mathf.PI) / ballRadius;
+        visualRepresentation.localRotation = Quaternion.Euler(Vector3.right * angle) * visualRepresentation.localRotation;
     }
 
     void ClearState()
@@ -153,24 +117,16 @@ public class Player : MonoBehaviour
         lastContactNormal = contactNormal;
         groundContactCount = steepContactCount = 0;
         contactNormal = steepNormal = Vector3.zero;
-        connectionVelocity = Vector3.zero;
-        previousConnectedBody = connectedBody;
-        connectedBody = null;
     }
 
     void UpdateState()
     {
         stepsSinceLastGrounded += 1;
-        stepsSinceLastJump += 1;
         velocity = body.velocity;
 
         if (OnGround || SnapToGround() || CheckSteepContacts())
         {
             stepsSinceLastGrounded = 0;
-            if (stepsSinceLastJump > 1)
-            {
-                jumpPhase = 0;
-            }
             
             if (groundContactCount > 1)
             {
@@ -182,68 +138,6 @@ public class Player : MonoBehaviour
         {
             contactNormal = upAxis;
         }
-
-        if (connectedBody)
-        {
-            if (connectedBody.isKinematic || connectedBody.mass >= body.mass)
-            {
-                UpdateConnectionState();
-            }
-        }
-    }
-
-    void UpdateConnectionState()
-    {
-        if (connectedBody == previousConnectedBody)
-        {
-            Vector3 connectionMovement = connectedBody.transform.TransformPoint(connectionLocalPosition) - connectionWorldPosition;
-            connectionVelocity = connectionMovement / Time.deltaTime;
-        }
-        connectionWorldPosition = body.position;
-        connectionLocalPosition = connectedBody.transform.InverseTransformPoint(connectionWorldPosition);
-
-    }
-
-    
-    void Jump(Vector3 gravity)
-    {
-        Vector3 jumpDirection;
-
-        if (OnGround)
-        {
-            jumpDirection = contactNormal;
-        }
-        else if (OnSteep)
-        {
-            jumpDirection = steepNormal;
-            jumpPhase = 0;
-        }
-        else if (maxAirJumps > 0 && jumpPhase <= maxAirJumps)
-        {
-            if (jumpPhase == 0)
-            {
-                jumpPhase = 1;
-            }
-            jumpDirection = contactNormal;
-        }
-        else
-        {
-            return;
-        }
-
-        stepsSinceLastJump = 0;
-        jumpPhase += 1;
-        float jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
-        jumpDirection = (jumpDirection + upAxis).normalized;
-        float alignedSpeed = Vector3.Dot(velocity, jumpDirection);
-        if (alignedSpeed > 0f)
-        {
-            jumpSpeed = Mathf.Max(jumpSpeed - alignedSpeed, 0f);
-        }
-
-        velocity += jumpDirection * jumpSpeed;
-        
-        
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -304,27 +198,23 @@ public class Player : MonoBehaviour
 
     void AdjustVelocity()
     {
-        float acceleration, speed;
+        float acceleration;
         Vector3 xAxis, zAxis;
 
         acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
-        speed = maxSpeed;
-        xAxis = rightAxis;
-        zAxis = forwardAxis;
-        
-        xAxis = ProjectDirectionOnPlane(xAxis, contactNormal);
-        zAxis = ProjectDirectionOnPlane(zAxis, contactNormal);
 
-        Vector3 relativeVelocity = velocity - connectionVelocity;
+        xAxis = ProjectDirectionOnPlane(transform.right, contactNormal);
+        zAxis = ProjectDirectionOnPlane(transform.forward, contactNormal);
 
-        Vector3 adjustment;
-        adjustment.x = playerInput.x * speed - Vector3.Dot(relativeVelocity, xAxis);
-        adjustment.y = 0;
-        adjustment.z = playerInput.z * speed - Vector3.Dot(relativeVelocity, zAxis);
+        float horizontalSpeed;
+        horizontalSpeed = playerInput * maxHorizontalSpeed - Vector3.Dot(velocity, xAxis);
+        horizontalSpeed = Mathf.Clamp(horizontalSpeed, -acceleration * Time.deltaTime, acceleration * Time.deltaTime);
 
-        adjustment = Vector3.ClampMagnitude(adjustment, acceleration * Time.deltaTime);
+        float forwardSpeed;
+        forwardSpeed = maxForwardSpeed - Vector3.Dot(velocity, zAxis);
+        forwardSpeed = Mathf.Clamp(forwardSpeed, -acceleration * Time.deltaTime, acceleration * Time.deltaTime);
 
-        velocity += xAxis * adjustment.x + zAxis * adjustment.z;
+        velocity += xAxis * horizontalSpeed + zAxis * forwardSpeed;
     }
 
     Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal)
@@ -334,7 +224,7 @@ public class Player : MonoBehaviour
 
     bool SnapToGround()
     {
-        if (stepsSinceLastGrounded > 1 || stepsSinceLastJump <= 2)
+        if (stepsSinceLastGrounded > 1)
         {
             return false;
         }
@@ -368,10 +258,5 @@ public class Player : MonoBehaviour
     float GetMinDot(int layer)
     {
         return (stairsMask & (1 << layer)) == 0 ? minGroundDotProduct : minStairsDotProduct;
-    }
-
-    public void PreventSnapToGround()
-    {
-        stepsSinceLastJump = -1;
     }
 }

@@ -65,10 +65,5 @@ public class AccelerationZone : MonoBehaviour
         }
 
         body.velocity = transform.TransformDirection(velocity);
-
-        if (body.TryGetComponent(out Player player))
-        {
-            player.PreventSnapToGround();
-        }
     }
 }
