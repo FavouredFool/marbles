@@ -76,8 +76,13 @@ public class Player : MonoBehaviour
     {
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
 
+        // Lookforward depends on the curvature of the track
+        Vector3 closestPoint = ClosestPointOnCircle(body.position, 512);
+        Vector3 outerDirection = closestPoint.normalized;
+        Vector3 forwardDirection = Quaternion.AngleAxis(90, Vector3.up) * outerDirection;
+
         // Rotate ball, so that it always aligns with the track
-        transform.rotation = Quaternion.LookRotation(transform.forward, upAxis);
+        transform.rotation = Quaternion.LookRotation(forwardDirection, upAxis);
 
         UpdateState();
         AdjustVelocity();
@@ -94,6 +99,12 @@ public class Player : MonoBehaviour
 
         body.velocity = velocity;
         ClearState();
+    }
+
+    public Vector3 ClosestPointOnCircle(Vector3 position, float radius)
+    {
+        // Circles origin is assumed to be the center
+        return new Vector3(position.x, 0, position.z).normalized * radius;
     }
 
     void UpdateBall()

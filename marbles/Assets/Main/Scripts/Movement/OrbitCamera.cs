@@ -32,22 +32,25 @@ public class OrbitCamera : MonoBehaviour
     private void Awake()
     {
         regularCamera = GetComponent<Camera>();
-        transform.localRotation = orbitRotation = Quaternion.Euler(orbitAngle, 0, 0);
     }
 
 
     private void LateUpdate()
     {
-        focusPoint = focus.position + Vector3.forward * cameraLookAtForwardOffset;
+        focusPoint = focus.position + focus.forward * cameraLookAtForwardOffset;
         orbitRotation = Quaternion.Euler(orbitAngle, 0, 0);
 
-        UpdateGravityAlignment();
+        //UpdateGravityAlignment();
 
         //Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
         //Vector3 fromUp = gravityAlignment * Vector3.up;
         //
         //gravityAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
 
+        Vector3 fromUp = gravityAlignment * Vector3.up;
+        Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
+
+        gravityAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
         Quaternion lookRotation = gravityAlignment * orbitRotation;
 
         Vector3 lookDirection = lookRotation * Vector3.forward;
