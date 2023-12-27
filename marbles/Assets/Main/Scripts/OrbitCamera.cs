@@ -35,21 +35,10 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField, Min(0f)]
     float upAlignmentSpeed = 360f;
 
-    Vector3 CameraHalfExtends
-    {
-        get
-        {
-            Vector3 halfExtends;
-            halfExtends.y = regularCamera.nearClipPlane * Mathf.Tan(0.5f * Mathf.Deg2Rad * regularCamera.fieldOfView);
-            halfExtends.x = halfExtends.y * regularCamera.aspect;
-            halfExtends.z = 0f;
-            return halfExtends;
-        }
-    }
 
-    Vector3 focusPoint, previousFocusPoint;
-    Vector2 orbitAngles = new Vector2(45f, 0f);
-    float lastManualRotationTime;
+    Vector3 focusPoint;
+    [SerializeField]
+    Vector2 orbitAngles = new Vector2(25f, 0f);
 
     Camera regularCamera;
     Quaternion gravityAlignment = Quaternion.identity;
@@ -70,49 +59,16 @@ public class OrbitCamera : MonoBehaviour
         }
     }
 
-    void ConstrainAngles()
-    {
-        orbitAngles.x = Mathf.Clamp(orbitAngles.x, minVerticalAngle, maxVerticalAngle);
-
-        if (orbitAngles.y < 0f)
-        {
-            orbitAngles.y += 360f;
-        }
-        else if (orbitAngles.y >= 360f)
-        {
-            orbitAngles.y -= 360f;
-        }
-    }
-
     private void LateUpdate()
     {
         UpdateGravityAlignment();
 
         UpdateFocusPoint();
-        //if (ManualRotation() || AutomaticRotation())
-        //{
-        //    ConstrainAngles();
-        //    orbitRotation = Quaternion.Euler(orbitAngles);
-        //}
+
         Quaternion lookRotation = gravityAlignment * orbitRotation;
 
         Vector3 lookDirection = lookRotation * Vector3.forward;
         Vector3 lookPosition = focusPoint - lookDirection * distance;
-
-        Vector3 rectOffset = lookDirection * regularCamera.nearClipPlane;
-        Vector3 rectPosition = lookPosition + rectOffset;
-        Vector3 castFrom = focus.position;
-        Vector3 castLine = rectPosition - castFrom;
-        float castDistance = castLine.magnitude;
-        Vector3 castDirection = castLine / castDistance;
-
-        if (Physics.BoxCast(
-            castFrom, CameraHalfExtends, castDirection, out RaycastHit hit, lookRotation, castDistance, obstructionMask
-            ))
-        {
-            rectPosition = castFrom + castDirection * hit.distance;
-            lookPosition = rectPosition - rectOffset;
-        }
 
         transform.SetPositionAndRotation(lookPosition, lookRotation);
     }
@@ -134,12 +90,10 @@ public class OrbitCamera : MonoBehaviour
         {
             gravityAlignment = Quaternion.SlerpUnclamped(gravityAlignment, newAlignment, maxAngle / angle);
         }
-        
     }
 
     void UpdateFocusPoint()
     {
-        previousFocusPoint = focusPoint;
         Vector3 targetPoint = focus.position;
         if (focusRadius  > 0f)
         {
@@ -162,60 +116,6 @@ public class OrbitCamera : MonoBehaviour
             focusPoint = targetPoint;
         }
     }
-
-    bool ManualRotation()
-    {
-        Vector2 input = new Vector2(
-            -Input.GetAxis("Vertical Camera"),
-            Input.GetAxis("Horizontal Camera")
-            );
-        const float e = 0.001f;
-        if (input.x < -e || input.x > e || input.y < -e || input.y > e)
-        {
-            orbitAngles += rotationSpeed * Time.unscaledDeltaTime * input;
-            lastManualRotationTime = Time.unscaledTime;
-            return true;
-        }
-        return false;
-    }
-
-    bool AutomaticRotation()
-    {
-        if (Time.unscaledTime - lastManualRotationTime < alignDelay)
-        {
-            return false;
-        }
-
-        Vector3 alignedDelta = Quaternion.Inverse(gravityAlignment) * (focusPoint - previousFocusPoint);
-
-        Vector2 movement = new Vector2(
-            alignedDelta.x,
-            alignedDelta.z
-            );
-        float movementDeltaSqr = movement.sqrMagnitude;
-        if (movementDeltaSqr < 0.00001f)
-        {
-            return false;
-        }
-
-        float headingAngle = GetAngle(movement / Mathf.Sqrt(movementDeltaSqr));
-        float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, headingAngle));
-        float rotationChange = rotationSpeed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);
-        if (deltaAbs < alignSmoothRange)
-        {
-            rotationChange *= deltaAbs / alignSmoothRange;
-        }
-        else if (180f - deltaAbs < alignSmoothRange)
-        {
-            rotationChange *= (180f - deltaAbs) / alignSmoothRange;
-        }
-
-        orbitAngles.y = Mathf.MoveTowardsAngle(orbitAngles.y, headingAngle, rotationChange);
-
-        return true;
-    }
-
-    
 
     static float GetAngle(Vector2 direction)
     {

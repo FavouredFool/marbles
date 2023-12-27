@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     float maxForwardSpeed = 10f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;
 
     [SerializeField, Range(0f, 100f)]
-    float maxAcceleration = 10f, maxAirAcceleration = 1f;
+    float maxForwardAcceleration = 10f, maxHorizontalAcceleration = 10f;
 
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -31,11 +31,9 @@ public class Player : MonoBehaviour
     [SerializeField, Min(0.1f)]
     float ballRadius = 0.5f;
 
-    Vector3 velocity, connectionVelocity;
+    Vector3 velocity;
     float playerInput;
-    Vector3 acceleration;
-    float maxSpeedChange;
-    Rigidbody body, connectedBody, previousConnectedBody;
+    Rigidbody body;
 
     int groundContactCount, steepContactCount;
 
@@ -49,11 +47,9 @@ public class Player : MonoBehaviour
     int stepsSinceLastGrounded;
 
     Vector3 upAxis;
-    Vector3 connectionWorldPosition, connectionLocalPosition;
 
     MeshRenderer meshRenderer;
 
-    Vector3 lastContactNormal;
 
     private void Awake()
     {
@@ -88,7 +84,7 @@ public class Player : MonoBehaviour
 
         if (OnGround && velocity.sqrMagnitude < 0.01f)
         {
-            velocity += contactNormal * (Vector3.Dot(gravity, contactNormal) * Time.deltaTime);
+            velocity += contactNormal * (Vector3.Dot(gravity.normalized, contactNormal) * Time.deltaTime);
         }
         else
         {
@@ -114,7 +110,6 @@ public class Player : MonoBehaviour
 
     void ClearState()
     {
-        lastContactNormal = contactNormal;
         groundContactCount = steepContactCount = 0;
         contactNormal = steepNormal = Vector3.zero;
     }
@@ -162,7 +157,6 @@ public class Player : MonoBehaviour
             {
                 groundContactCount += 1;
                 contactNormal += normal;
-                connectedBody = collision.rigidbody;
             }
             else
             {
@@ -170,10 +164,6 @@ public class Player : MonoBehaviour
                 {
                     steepContactCount += 1;
                     steepNormal += normal;
-                    if (groundContactCount == 0)
-                    {
-                        connectedBody = collision.rigidbody;
-                    }
                 }
             }
         }
@@ -198,21 +188,19 @@ public class Player : MonoBehaviour
 
     void AdjustVelocity()
     {
-        float acceleration;
         Vector3 xAxis, zAxis;
-
-        acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
 
         xAxis = ProjectDirectionOnPlane(transform.right, contactNormal);
         zAxis = ProjectDirectionOnPlane(transform.forward, contactNormal);
 
         float horizontalSpeed;
         horizontalSpeed = playerInput * maxHorizontalSpeed - Vector3.Dot(velocity, xAxis);
-        horizontalSpeed = Mathf.Clamp(horizontalSpeed, -acceleration * Time.deltaTime, acceleration * Time.deltaTime);
+        horizontalSpeed = Mathf.Clamp(horizontalSpeed, -maxHorizontalAcceleration * Time.deltaTime, maxHorizontalAcceleration * Time.deltaTime);
 
         float forwardSpeed;
+        // Velocity throttles itself like this without ever needing to clamp it.
         forwardSpeed = maxForwardSpeed - Vector3.Dot(velocity, zAxis);
-        forwardSpeed = Mathf.Clamp(forwardSpeed, -acceleration * Time.deltaTime, acceleration * Time.deltaTime);
+        forwardSpeed = Mathf.Clamp(forwardSpeed, -maxForwardAcceleration * Time.deltaTime, maxForwardAcceleration * Time.deltaTime);
 
         velocity += xAxis * horizontalSpeed + zAxis * forwardSpeed;
     }
@@ -251,7 +239,6 @@ public class Player : MonoBehaviour
             velocity = (velocity - hit.normal * dot).normalized * speed;
         }
 
-        connectedBody = hit.rigidbody;
         return true;
     }
 
