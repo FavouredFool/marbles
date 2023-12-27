@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 {
 
     [SerializeField]
-    Transform playerInputSpace = default;
+    Transform playerInputSpace = default, ball = default;
 
     [SerializeField, Range(0f, 100f)]
     float maxSpeed = 10f, maxSnapSpeed = 5f;
@@ -32,6 +32,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     Material normalMaterial = default;
 
+    [SerializeField, Min(0.1f)]
+    float ballRadius = 0.5f;
+
     Vector3 velocity, connectionVelocity;
     Vector3 playerInput;
     Vector3 acceleration;
@@ -56,11 +59,13 @@ public class Player : MonoBehaviour
 
     MeshRenderer meshRenderer;
 
+    Vector3 lastContactNormal;
+
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
         body.useGravity = false;
-        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer = ball.GetComponent<MeshRenderer>();
         OnValidate();
     }
 
@@ -73,12 +78,12 @@ public class Player : MonoBehaviour
     public void Update()
     {
         playerInput.x = 0f;
-        playerInput.y = 0f;
+        playerInput.z = 0f;
 
         playerInput.x = Input.GetAxis("Horizontal");
-        playerInput.y = Input.GetAxis("Vertical");
+        playerInput.z = Input.GetAxis("Vertical");
 
-        playerInput = Vector2.ClampMagnitude(playerInput, 1f);
+        playerInput = Vector3.ClampMagnitude(playerInput, 1f);
 
         if (playerInputSpace)
         {
@@ -92,6 +97,8 @@ public class Player : MonoBehaviour
         }
 
         desiredJump |= Input.GetKeyDown(KeyCode.Space);
+
+        UpdateBall();
     }
 
     private void FixedUpdate()
@@ -122,8 +129,28 @@ public class Player : MonoBehaviour
         ClearState();
     }
 
+    void UpdateBall()
+    {
+        Material ballMaterial = normalMaterial;
+
+        meshRenderer.material = ballMaterial;
+
+        Vector3 movement = body.velocity * Time.deltaTime;
+        float distance = movement.magnitude;
+
+        if (distance < 0.001f)
+        {
+            return;
+        }
+        float angle = distance * (180f / Mathf.PI) / ballRadius;
+
+        Vector3 rotationAxis = Vector3.Cross(lastContactNormal, movement).normalized;
+        ball.localRotation = Quaternion.Euler(rotationAxis * angle) * ball.localRotation;
+    }
+
     void ClearState()
     {
+        lastContactNormal = contactNormal;
         groundContactCount = steepContactCount = 0;
         contactNormal = steepNormal = Vector3.zero;
         connectionVelocity = Vector3.zero;
@@ -285,22 +312,19 @@ public class Player : MonoBehaviour
         xAxis = rightAxis;
         zAxis = forwardAxis;
         
-
         xAxis = ProjectDirectionOnPlane(xAxis, contactNormal);
         zAxis = ProjectDirectionOnPlane(zAxis, contactNormal);
 
         Vector3 relativeVelocity = velocity - connectionVelocity;
-        float currentX = Vector3.Dot(relativeVelocity, xAxis);
-        float currentZ = Vector3.Dot(relativeVelocity, zAxis);
 
-        float maxSpeedChange = acceleration * Time.deltaTime;
+        Vector3 adjustment;
+        adjustment.x = playerInput.x * speed - Vector3.Dot(relativeVelocity, xAxis);
+        adjustment.y = 0;
+        adjustment.z = playerInput.z * speed - Vector3.Dot(relativeVelocity, zAxis);
 
-        float newX =
-            Mathf.MoveTowards(currentX, playerInput.x * speed, maxSpeedChange);
-        float newZ =
-            Mathf.MoveTowards(currentZ, playerInput.y * speed, maxSpeedChange);
-        //Debug.Log(xAxis * (newX - currentX) + zAxis * (newZ - currentZ));
-        velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
+        adjustment = Vector3.ClampMagnitude(adjustment, acceleration * Time.deltaTime);
+
+        velocity += xAxis * adjustment.x + zAxis * adjustment.z;
     }
 
     Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal)
@@ -344,5 +368,10 @@ public class Player : MonoBehaviour
     float GetMinDot(int layer)
     {
         return (stairsMask & (1 << layer)) == 0 ? minGroundDotProduct : minStairsDotProduct;
+    }
+
+    public void PreventSnapToGround()
+    {
+        stepsSinceLastJump = -1;
     }
 }
