@@ -14,14 +14,11 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField, Range(1f, 20f)]
     float distance = 5f;
 
-    [SerializeField, Range(1f, 360f)]
-    float rotationSpeed = 90f;
-
     [SerializeField, Range(5, 25)]
     float orbitAngle = 12.5f;
 
-    [SerializeField, Range(0, 3000)]
-    float upAlignmentSpeed = 5f;
+    //[SerializeField, Range(0, 3000)]
+    //float upAlignmentSpeed = 5f;
 
     Vector3 focusPoint;
 
@@ -38,45 +35,33 @@ public class OrbitCamera : MonoBehaviour
     private void LateUpdate()
     {
         focusPoint = focus.position + focus.forward * cameraLookAtForwardOffset;
-        orbitRotation = Quaternion.Euler(orbitAngle, 0, 0);
+        
+        Quaternion lookRotation = Quaternion.LookRotation(focusPoint - transform.position, CustomGravity.GetUpAxis(focus.position));
 
-        //UpdateGravityAlignment();
-
-        //Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
-        //Vector3 fromUp = gravityAlignment * Vector3.up;
-        //
-        //gravityAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
-
-        Vector3 fromUp = gravityAlignment * Vector3.up;
-        Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
-
-        gravityAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
-        Quaternion lookRotation = gravityAlignment * orbitRotation;
-
-        Vector3 lookDirection = lookRotation * Vector3.forward;
-        Vector3 lookPosition = focusPoint - lookDirection * distance;
+        Vector3 lookDirection = Quaternion.AngleAxis(orbitAngle, focus.right) * focus.forward;
+        Vector3 lookPosition = focus.position - lookDirection * distance;
 
         transform.SetPositionAndRotation(lookPosition, lookRotation);
     }
 
-    void UpdateGravityAlignment()
-    {
-        Vector3 fromUp = gravityAlignment * Vector3.up;
-        Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
-        float dot = Mathf.Clamp(Vector3.Dot(fromUp, toUp), -1f, -1f);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-        float maxAngle = upAlignmentSpeed * Time.deltaTime;
-        
-        Quaternion newAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
-        if (angle <= maxAngle)
-        {
-            gravityAlignment = newAlignment;
-        }
-        else
-        {
-            gravityAlignment = Quaternion.SlerpUnclamped(gravityAlignment, newAlignment, maxAngle / angle);
-        }
-    }
+    //void UpdateGravityAlignment()
+    //{
+    //    Vector3 fromUp = gravityAlignment * Vector3.up;
+    //    Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
+    //    float dot = Mathf.Clamp(Vector3.Dot(fromUp, toUp), -1f, -1f);
+    //    float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+    //    float maxAngle = upAlignmentSpeed * Time.deltaTime;
+    //    
+    //    Quaternion newAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
+    //    if (angle <= maxAngle)
+    //    {
+    //        gravityAlignment = newAlignment;
+    //    }
+    //    else
+    //    {
+    //        gravityAlignment = Quaternion.SlerpUnclamped(gravityAlignment, newAlignment, maxAngle / angle);
+    //    }
+    //}
 
     static float GetAngle(Vector2 direction)
     {

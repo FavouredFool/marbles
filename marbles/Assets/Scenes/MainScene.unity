@@ -473,10 +473,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   focus: {fileID: 1912649119}
-  cameraLookAtForwardOffset: 5
-  distance: 8
-  rotationSpeed: 180
-  orbitAngle: 12.5
+  cameraLookAtForwardOffset: 80
+  distance: 3
+  orbitAngle: 20
   upAlignmentSpeed: 600
 --- !u!1 &340126802
 GameObject:

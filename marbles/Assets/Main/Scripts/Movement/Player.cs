@@ -113,9 +113,9 @@ public class Player : MonoBehaviour
 
         meshRenderer.material = ballMaterial;
 
-        float forwardMovement = body.velocity.z * Time.deltaTime;
+        float velocityMagPerFrame = body.velocity.magnitude * Time.deltaTime;
 
-        float angle = forwardMovement * (180f / Mathf.PI) / ballRadius;
+        float angle = velocityMagPerFrame * (180f / Mathf.PI) / ballRadius;
         visualRepresentation.localRotation = Quaternion.Euler(Vector3.right * angle) * visualRepresentation.localRotation;
     }
 
