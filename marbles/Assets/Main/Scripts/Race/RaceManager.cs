@@ -6,12 +6,15 @@ public class RaceManager : MonoBehaviour
 {
     float _startTime = float.PositiveInfinity;
 
-    public void RaceReached(bool isGoal)
+    bool _isGoal = false;
+
+    public void GoalReached()
     {
-        if (!isGoal)
+        if (!_isGoal)
         {
             _startTime = Time.time;
             Debug.Log("start!");
+            _isGoal = true;
         }
         else
         {
