@@ -21,11 +21,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Punked_Skybox
-  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c,
+    type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3_ON
   - BOOLEAN_CUBEMAP_ON
   - BOOLEAN_FF1E9D2611CF4E959316C577475EA27F_ON
   m_InvalidKeywords:
@@ -65,7 +65,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3: 1
+    - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3: 0
     - BOOLEAN_CUBEMAP: 1
     - BOOLEAN_FF1E9D2611CF4E959316C577475EA27F: 1
     - BOOLEAN_GLITCHYMOON: 1
@@ -78,8 +78,8 @@ Material:
     - _AlphaToMask: 0
     - _AlphaToMaskInspectorValue: 0
     - _BlendMode: 0
-    - _CubemapOpacity: 0.268
-    - _CubemapRotation: 0
+    - _CubemapOpacity: 0.203
+    - _CubemapRotation: 156
     - _CullMode: 2
     - _CullModeForward: 2
     - _DepthOffsetEnable: 0
@@ -88,15 +88,15 @@ Material:
     - _DstBlend: 0
     - _EnableBlendModePreserveSpecularLighting: 0
     - _EnableFogOnTransparent: 1
-    - _FogContrast: 30
-    - _FogHeight: 1
-    - _FogPower: 1
-    - _HorizonHeight: 0.08
-    - _HorizonStrength: 1
+    - _FogContrast: 40.1
+    - _FogHeight: 3.57
+    - _FogPower: 0.3
+    - _HorizonHeight: 0.362
+    - _HorizonStrength: 0.5
     - _LinesMaskPower: 21.9
-    - _LinesSpeed: 1
-    - _LinesThickness: 0.433
-    - _LinesTiling: 80
+    - _LinesSpeed: 3.62
+    - _LinesThickness: 0.438
+    - _LinesTiling: 77.46
     - _OpaqueCullMode: 2
     - _QueueControl: 1
     - _QueueOffset: 0
@@ -132,9 +132,9 @@ Material:
     m_Colors:
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _HorizonColor: {r: 0.93333334, g: 0.80960083, b: 0, a: 1}
+    - _HorizonColor: {r: 0, g: 0.93333334, b: 0.17666247, a: 1}
     - _LinesColor: {r: 0, g: 0.9137254, b: 1, a: 1}
-    - _SkyColor: {r: 0, g: 0.8746934, b: 1, a: 1}
+    - _SkyColor: {r: 1, g: 0, b: 0, a: 1}
     - _StarColor: {r: 0.9056604, g: 0.9056604, b: 0.9056604, a: 0}
     - _SunColorOne: {r: 1, g: 1, b: 1, a: 1}
     - _SunColorTwo: {r: 0.7169812, g: 0.7169812, b: 0.7169812, a: 1}

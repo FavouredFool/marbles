@@ -21,11 +21,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Default_Skybox
-  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c,
+    type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3_ON
   - BOOLEAN_CUBEMAP_ON
   - BOOLEAN_FF1E9D2611CF4E959316C577475EA27F_ON
   m_InvalidKeywords:
@@ -65,7 +65,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3: 1
+    - BOOLEAN_6665D7DA7AE94B969750A2E30E35C4B3: 0
     - BOOLEAN_CUBEMAP: 1
     - BOOLEAN_FF1E9D2611CF4E959316C577475EA27F: 1
     - BOOLEAN_GLITCHYMOON: 1
