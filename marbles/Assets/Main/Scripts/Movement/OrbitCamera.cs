@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Camera))]
@@ -25,55 +27,70 @@ public class OrbitCamera : MonoBehaviour
     float focusRadius = 1f;
 
     [SerializeField, Range(0f, 1f)]
-    float focusCentering = 0.5f;
+    float focusCentering = 0.999f;
+
+    [SerializeField, Range(0f, 1000f)]
+    float rotationDelta = 0.5f;
+
+    [SerializeField]
+    AnimationCurve camRotationCurve;
 
     Vector3 focusPoint;
 
-    Camera regularCamera;
-    Quaternion gravityAlignment = Quaternion.identity;
-    Quaternion orbitRotation;
+    Vector3 convertedPosition = Vector3.zero;
 
     private void Awake()
     {
-        regularCamera = GetComponent<Camera>();
         focusPoint = focus.position;
     }
 
 
     private void LateUpdate()
     {
+        // position
         UpdateFocusPoint();
-        Vector3 lookAtPoint = focusPoint + focus.forward * cameraLookAtForwardOffset;
-        Quaternion goalRotation = Quaternion.LookRotation(lookAtPoint - transform.position, CustomGravity.GetUpAxis(focus.position));
-
-        //Quaternion lookRotation = UpdateTwo(goalRotation);
-        //UpdateGravityAlignment();
-        //Quaternion lookRotation = gravityAlignment * orbitRotation;
-        Quaternion lookRotation = goalRotation;
-
         Vector3 lookDirection = Quaternion.AngleAxis(orbitAngle, focus.right) * focus.forward;
-
         Vector3 lookPosition = focusPoint - lookDirection * distance;
+
+        // rotation
+        float upAngle = Vector3.Angle(focus.up, transform.up);
+        float maxAngleAbs = 90;
+
+        float t = Mathf.Clamp01(Remap(upAngle, 0, maxAngleAbs, 0, 1));
+        // At 1 -> push back with exactly as much angle as you get by rotating to the side
+        // MAGIC NUMBER
+        float maxHorizontalSpeed = 52;
+
+        t = camRotationCurve.Evaluate(t);
+        float horizontalPushback = maxHorizontalSpeed * t;
+
+        Vector3 lookAtPoint = focusPoint + focus.forward * cameraLookAtForwardOffset;
+        Quaternion goalRotation = Quaternion.LookRotation(lookAtPoint - focusPoint, CustomGravity.GetUpAxis(focusPoint));
+        Quaternion partRotation = Quaternion.RotateTowards(transform.rotation, goalRotation, horizontalPushback * Time.deltaTime);
+        Quaternion lookRotation = partRotation;
 
         transform.SetPositionAndRotation(lookPosition, lookRotation);
     }
 
     void UpdateFocusPoint()
     {
-        Vector3 targetPoint = focus.position;
-
-        // focuspoint needs to be the same as targetPoint on the focus.forward vector and distance needs to also stay the same
-        // Step 1: project focusPoint onto targetpoint plane
-        Vector3 focusPointProjected = Vector3.ProjectOnPlane(focusPoint, focus.forward);
-
-        // Re-set Height
-        float magnitude = (targetPoint - ClosestPointOnCircle(targetPoint, 512)).magnitude;
-        Vector3 pointOnCircle = ClosestPointOnCircle(focusPointProjected, 512);
-        focusPoint = pointOnCircle + (focusPointProjected - pointOnCircle).normalized * magnitude;
-
         if (focusRadius > 0f)
         {
-            float distance = Vector3.Distance(targetPoint, focusPoint);
+            Vector3 focusPointClosestPoint = ClosestPointOnCircle(focusPoint, 512);
+            Vector3 focusPointDirectionToZero = -focusPointClosestPoint.normalized;
+            float focusPointAngle = Vector3.SignedAngle(Vector3.up, (focusPoint - focusPointClosestPoint).normalized, Vector3.Cross(Vector3.up, focusPointDirectionToZero.normalized));
+
+            Vector3 targetPointClosestPoint = ClosestPointOnCircle(focus.position, 512);
+            Vector3 targetPointDirectionToZero = - targetPointClosestPoint.normalized;
+            float targetPointMagnitude = (focus.position - targetPointClosestPoint).magnitude;
+
+            Quaternion angleRotation = Quaternion.AngleAxis(focusPointAngle, Vector3.Cross(Vector3.up, targetPointDirectionToZero.normalized));
+            Vector3 convertedDirection = RotatePointAroundPivot(Vector3.up, Vector3.zero, angleRotation).normalized;
+            convertedPosition = targetPointClosestPoint + convertedDirection * targetPointMagnitude;
+
+            focusPoint = convertedPosition;
+
+            float distance = Vector3.Distance(focus.position, focusPoint);
             float t = 1f;
             if (distance > 0.01f && focusCentering > 0f)
             {
@@ -86,12 +103,18 @@ public class OrbitCamera : MonoBehaviour
             }
 
             // the lerp puts the focusPoint on exactly the focusRadius outline. Really smarto
-            focusPoint = Vector3.Lerp(targetPoint, focusPoint, t);
+            //Debug.Log(t);
+            focusPoint = Vector3.Lerp(focus.position, focusPoint, t);
         }
         else
         {
-            focusPoint = targetPoint;
+            focusPoint = focus.position;
         }
+    }
+
+    public Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Quaternion rotation)
+    {
+        return rotation * (point - pivot) + pivot;
     }
 
     public Vector3 ClosestPointOnCircle(Vector3 position, float radius)
@@ -100,34 +123,15 @@ public class OrbitCamera : MonoBehaviour
         return new Vector3(position.x, 0, position.z).normalized * radius;
     }
 
-    void UpdateGravityAlignment()
+    float Remap(float s, float a1, float a2, float b1, float b2)
     {
-        Vector3 fromUp = gravityAlignment * Vector3.up;
-        Vector3 toUp = CustomGravity.GetUpAxis(focusPoint);
-        float dot = Mathf.Clamp(Vector3.Dot(fromUp, toUp), -1f, -1f);
-        float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-        float maxAngle = upAlignmentSpeed * Time.deltaTime;
-
-        Quaternion newAlignment = Quaternion.FromToRotation(fromUp, toUp) * gravityAlignment;
-        if (angle <= maxAngle)
-        {
-            gravityAlignment = newAlignment;
-        }
-        else
-        {
-            gravityAlignment = Quaternion.SlerpUnclamped(gravityAlignment, newAlignment, maxAngle / angle);
-        }
+        return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
     }
 
-    static float GetAngle(Vector2 direction)
+    private void OnDrawGizmos()
     {
-        float angle = Mathf.Acos(direction.y) * Mathf.Rad2Deg;
-        return direction.x < 0f ? 360f - angle : angle;
-    }
-
-    public void OnDrawGizmos()
-    {
+        Gizmos.DrawSphere(focusPoint, 0.4f);
         Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(focusPoint, 0.5f);
+        Gizmos.DrawSphere(convertedPosition, 0.5f);
     }
 }

@@ -630,8 +630,42 @@ MonoBehaviour:
   distance: 3
   orbitAngle: 20
   upAlignmentSpeed: 5
-  focusRadius: 0.25
+  focusRadius: 0.35
   focusCentering: 0.999
+  rotationDelta: 25
+  camRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 4.3843575
+      outSlope: 4.3843575
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.043770455
+    - serializedVersion: 3
+      time: 0.39300105
+      value: 0.8476192
+      inSlope: 0.31164873
+      outSlope: 0.31164873
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.11966285
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.270639
+      outSlope: 0.270639
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.13660404
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &340126802
 GameObject:
   m_ObjectHideFlags: 0
@@ -9301,7 +9335,7 @@ Transform:
   m_GameObject: {fileID: 1912649113}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -505.5, y: 0, z: 0}
+  m_LocalPosition: {x: -505.5, y: -0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9323,7 +9357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInputSpace: {fileID: 330585546}
   visualRepresentation: {fileID: 676130374}
-  maxForwardSpeed: 1
+  maxForwardSpeed: 15
   maxHorizontalSpeed: 6
   maxSnapSpeed: 5
   maxForwardAcceleration: 25
