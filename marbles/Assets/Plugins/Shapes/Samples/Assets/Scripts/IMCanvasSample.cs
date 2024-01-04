@@ -21,14 +21,14 @@ namespace Shapes {
 			base.DrawPanels();
 
 			// Draw a crosshair in the middle
-			Draw.Disc( Vector3.zero, 4f );
-			Vector2 a = new Vector2( 14, 0 );
-			Vector2 b = new Vector2( 28, 0 );
-			for( int i = 0; i < 4; i++ ) {
-				Draw.Line( a, b, 4f, LineEndCap.Round );
-				a = ShapesMath.Rotate90CCW( a );
-				b = ShapesMath.Rotate90CCW( b );
-			}
+			//Draw.Disc( Vector3.zero, 4f );
+			//Vector2 a = new Vector2( 14, 0 );
+			//Vector2 b = new Vector2( 28, 0 );
+			//for( int i = 0; i < 4; i++ ) {
+			//	Draw.Line( a, b, 4f, LineEndCap.Round );
+			//	a = ShapesMath.Rotate90CCW( a );
+			//	b = ShapesMath.Rotate90CCW( b );
+			//}
 		}
 
 	}

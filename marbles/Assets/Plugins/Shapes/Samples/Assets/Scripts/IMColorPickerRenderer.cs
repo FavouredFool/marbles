@@ -44,7 +44,7 @@ namespace Shapes {
 
 		// Main drawing function. Called every time a camera wants to render this
 		public override void DrawShapes( Camera cam ) {
-			using( Draw.Command( cam ) ) {
+			using( Draw.Command( cam, UnityEngine.Rendering.Universal.RenderPassEvent.BeforeRenderingPostProcessing ) ) {
 				// make drawing relative to this transform
 				Draw.Matrix = transform.localToWorldMatrix;
 

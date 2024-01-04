@@ -4,7 +4,7 @@ public class Player : MonoBehaviour
 {
 
     [SerializeField]
-    Transform playerInputSpace = default, visualRepresentation = default;
+    Transform visualRepresentation = default;
 
     [SerializeField, Range(0f, 100f)]
     float maxForwardSpeed = 20f, midForwardSpeed = 15f, lowForwardSpeed = 5f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;

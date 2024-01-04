@@ -13,8 +13,6 @@ public class TriggerZone : MonoBehaviour
         Player player = other.gameObject.GetComponent<Player>();
         if (player == null) return;
 
-        Debug.Log("entered");
-
         if (SpeedZone)
         {
             player.IsInSpeedZone = true;
@@ -29,8 +27,6 @@ public class TriggerZone : MonoBehaviour
     {
         Player player = other.gameObject.GetComponent<Player>();
         if (player == null) return;
-
-        Debug.Log("exited");
 
         player.IsInSpeedZone = false;
         player.IsInSlowZone = false;
