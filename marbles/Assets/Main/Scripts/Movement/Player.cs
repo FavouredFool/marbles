@@ -7,10 +7,10 @@ public class Player : MonoBehaviour
     Transform playerInputSpace = default, visualRepresentation = default;
 
     [SerializeField, Range(0f, 100f)]
-    float maxForwardSpeed = 10f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;
+    float maxForwardSpeed = 20f, midForwardSpeed = 15f, lowForwardSpeed = 5f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;
 
     [SerializeField, Range(0f, 100f)]
-    float maxForwardAcceleration = 10f, maxHorizontalAcceleration = 10f;
+    float maxForwardAcceleration = 10f, maxBackAcceleration = 1f, maxHorizontalAcceleration = 10f;
 
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -30,6 +30,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     float radius = 256f;
 
+    [SerializeField]
+    float turnTax = 25f;
+
     Vector3 velocity;
     float playerInput;
     Rigidbody body;
@@ -48,7 +51,11 @@ public class Player : MonoBehaviour
     Vector3 upAxis;
 
     MeshRenderer meshRenderer;
+    
+    public bool IsInSpeedZone { get; set; }
+    public bool IsInSlowZone { get; set; }
 
+    float forwardSpeedLastTick = 0;
 
     private void Awake()
     {
@@ -73,6 +80,9 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // find out speedstate
+        float forwardSpeedFull = GetForwardSpeedFull();
+
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
 
         // Lookforward depends on the curvature of the track
@@ -84,7 +94,7 @@ public class Player : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(forwardDirection, upAxis);
 
         UpdateState();
-        AdjustVelocity();
+        AdjustVelocity(forwardSpeedFull);
 
         if (OnGround && velocity.sqrMagnitude < 0.01f)
         {
@@ -98,6 +108,22 @@ public class Player : MonoBehaviour
 
         body.velocity = velocity;
         ClearState();
+    }
+
+    public float GetForwardSpeedFull()
+    {
+        if (IsInSpeedZone)
+        {
+            return maxForwardSpeed;
+        }
+        else if (IsInSlowZone)
+        {
+            return lowForwardSpeed;
+        }
+        else
+        {
+            return midForwardSpeed;
+        }
     }
 
     public Vector3 ClosestPointOnCircle(Vector3 position, float radius)
@@ -196,7 +222,7 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    void AdjustVelocity()
+    void AdjustVelocity(float forwardSpeedFull)
     {
         Vector3 xAxis, zAxis;
 
@@ -209,8 +235,26 @@ public class Player : MonoBehaviour
 
         float forwardSpeed;
         // Velocity throttles itself like this without ever needing to clamp it.
-        forwardSpeed = maxForwardSpeed - Vector3.Dot(velocity, zAxis);
-        forwardSpeed = Mathf.Clamp(forwardSpeed, -maxForwardAcceleration * Time.deltaTime, maxForwardAcceleration * Time.deltaTime);
+
+        // Turn tax
+        //Debug.Log(horizontalSpeed);
+        //float forwardSpeedMinusTax = forwardSpeedFull - Mathf.Abs(playerInput * maxHorizontalSpeed);
+
+        forwardSpeedFull -= Mathf.Abs(playerInput * maxHorizontalSpeed * turnTax * Time.deltaTime);
+        forwardSpeedFull = Mathf.Max(forwardSpeedFull, lowForwardSpeed);
+
+        forwardSpeed = forwardSpeedFull - Vector3.Dot(velocity, zAxis);
+
+        if (forwardSpeed - forwardSpeedLastTick >= 0)
+        {
+            forwardSpeed = Mathf.Clamp(forwardSpeed, -maxForwardAcceleration * Time.deltaTime, maxForwardAcceleration * Time.deltaTime);
+        }
+        else
+        {
+            forwardSpeed = Mathf.Clamp(forwardSpeed, -maxBackAcceleration * Time.deltaTime, maxBackAcceleration * Time.deltaTime);
+        }        
+
+        forwardSpeedLastTick = forwardSpeed;
 
         velocity += xAxis * horizontalSpeed + zAxis * forwardSpeed;
     }
