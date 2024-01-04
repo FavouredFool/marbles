@@ -15,7 +15,7 @@ public class SpeedLineController : MonoBehaviour
     public void Awake()
     {
         rb = player.GetComponent<Rigidbody>();
-        vfx.enabled = true;
+        vfx.gameObject.SetActive(true);
     }
 
     public void LateUpdate()
