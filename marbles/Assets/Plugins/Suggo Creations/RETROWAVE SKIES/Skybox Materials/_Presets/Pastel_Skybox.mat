@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Pastel_Skybox
-  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 199b0e4476768a84fba8e01e2333b57c,
+    type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -78,12 +79,12 @@ Material:
     - _FogContrast: 30
     - _FogHeight: 1
     - _FogPower: 0.3
-    - _HorizonHeight: 0.61
+    - _HorizonHeight: 0.467
     - _HorizonStrength: 2
-    - _LinesMaskPower: 41.3
-    - _LinesSpeed: 0.75
-    - _LinesThickness: 0.351
-    - _LinesTiling: 45.66
+    - _LinesMaskPower: 18.2
+    - _LinesSpeed: 0.92
+    - _LinesThickness: 0.343
+    - _LinesTiling: 45.84
     - _OpaqueCullMode: 2
     - _QueueControl: 1
     - _QueueOffset: 0

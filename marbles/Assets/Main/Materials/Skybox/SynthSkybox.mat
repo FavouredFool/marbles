@@ -92,10 +92,10 @@ Material:
     - _FogPower: 0
     - _HorizonHeight: 0.042
     - _HorizonStrength: 1.39
-    - _LinesMaskPower: 24.9
-    - _LinesSpeed: 0.94
+    - _LinesMaskPower: 0
+    - _LinesSpeed: 0.1
     - _LinesThickness: 0.085
-    - _LinesTiling: 44.9
+    - _LinesTiling: 46.3
     - _OpaqueCullMode: 2
     - _QueueControl: 1
     - _QueueOffset: 0

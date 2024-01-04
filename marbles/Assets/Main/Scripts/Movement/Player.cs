@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
     float maxForwardSpeed = 20f, midForwardSpeed = 15f, lowForwardSpeed = 5f, maxHorizontalSpeed = 5f, maxSnapSpeed = 5f;
 
     [SerializeField, Range(0f, 100f)]
-    float maxForwardAcceleration = 10f, maxBackAcceleration = 1f, maxHorizontalAcceleration = 10f;
+    float maxForwardAcceleration = 10f, maxBackAcceleration = 1f, maxBackAccelerationInSlow = 10f, maxHorizontalAcceleration = 10f;
 
     [SerializeField, Range(0f, 90f)]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -251,7 +251,18 @@ public class Player : MonoBehaviour
         }
         else
         {
-            forwardSpeed = Mathf.Clamp(forwardSpeed, -maxBackAcceleration * Time.deltaTime, maxBackAcceleration * Time.deltaTime);
+            float backAcceleration;
+
+            if (IsInSlowZone)
+            {
+                backAcceleration = maxBackAccelerationInSlow;
+            }
+            else
+            {
+                backAcceleration = maxBackAcceleration;
+            }
+
+            forwardSpeed = Mathf.Clamp(forwardSpeed, -backAcceleration * Time.deltaTime, backAcceleration * Time.deltaTime);
         }        
 
         forwardSpeedLastTick = forwardSpeed;
