@@ -32,6 +32,9 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField]
     float radius = 256f;
 
+    [SerializeField]
+    LightRotation[] lights;
+
     Vector3 focusPoint;
 
     Vector3 convertedPosition = Vector3.zero;
@@ -67,6 +70,16 @@ public class OrbitCamera : MonoBehaviour
         Quaternion lookRotation = partRotation;
 
         transform.SetPositionAndRotation(lookPosition, lookRotation);
+
+        foreach (LightRotation light in lights)
+        {
+            light.UpdateLight(transform.rotation);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        
     }
 
     void UpdateFocusPoint()
@@ -123,12 +136,5 @@ public class OrbitCamera : MonoBehaviour
     float Remap(float s, float a1, float a2, float b1, float b2)
     {
         return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(focusPoint, 0.4f);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(convertedPosition, 0.5f);
     }
 }

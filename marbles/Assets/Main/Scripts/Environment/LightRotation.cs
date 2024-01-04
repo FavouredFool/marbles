@@ -6,11 +6,10 @@ using UnityEngine.UIElements;
 
 public class LightRotation : MonoBehaviour
 {
-    [SerializeField] Transform relativeObject;
     [SerializeField] float verticalOffset = 15f;
 
-    void LateUpdate()
+    public void UpdateLight(Quaternion rotation)
     {
-        transform.rotation = relativeObject.rotation * Quaternion.Euler(180 - verticalOffset, 0, 180);
+        transform.rotation = rotation * Quaternion.Euler(180 - verticalOffset, 0, 180);
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 public class GetGlobalMatrix : MonoBehaviour
 {
 
-    void Update()
+    void LateUpdate()
     {
         Shader.SetGlobalMatrix("_LightMatrix", Matrix4x4.Rotate(transform.rotation));
     }
