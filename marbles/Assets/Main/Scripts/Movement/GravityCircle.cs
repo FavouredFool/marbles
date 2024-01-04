@@ -9,9 +9,12 @@ public class GravityCircle : GravitySource
     [SerializeField]
     float gravity = 9.81f;
 
+    [SerializeField]
+    float radius = 256f;
+
     public override Vector3 GetGravity(Vector3 position)
     {
-        Vector3 attractPoint = ClosestPointOnCircle(position, 512);
+        Vector3 attractPoint = ClosestPointOnCircle(position, radius);
 
         Vector3 vector = attractPoint - position;
         float distance = vector.magnitude;

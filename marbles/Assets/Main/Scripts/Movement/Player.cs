@@ -31,6 +31,9 @@ public class Player : MonoBehaviour
     [SerializeField, Min(0.1f)]
     float ballRadius = 0.5f;
 
+    [SerializeField]
+    float radius = 256f;
+
     Vector3 velocity;
     float playerInput;
     Rigidbody body;
@@ -77,7 +80,7 @@ public class Player : MonoBehaviour
         Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
 
         // Lookforward depends on the curvature of the track
-        Vector3 closestPoint = ClosestPointOnCircle(body.position, 512);
+        Vector3 closestPoint = ClosestPointOnCircle(body.position, radius);
         Vector3 outerDirection = closestPoint.normalized;
         Vector3 forwardDirection = Quaternion.AngleAxis(90, Vector3.up) * outerDirection;
 

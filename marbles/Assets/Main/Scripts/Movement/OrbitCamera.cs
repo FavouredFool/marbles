@@ -35,6 +35,9 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField]
     AnimationCurve camRotationCurve;
 
+    [SerializeField]
+    float radius = 256f;
+
     Vector3 focusPoint;
 
     Vector3 convertedPosition = Vector3.zero;
@@ -76,11 +79,11 @@ public class OrbitCamera : MonoBehaviour
     {
         if (focusRadius > 0f)
         {
-            Vector3 focusPointClosestPoint = ClosestPointOnCircle(focusPoint, 512);
+            Vector3 focusPointClosestPoint = ClosestPointOnCircle(focusPoint, radius);
             Vector3 focusPointDirectionToZero = -focusPointClosestPoint.normalized;
             float focusPointAngle = Vector3.SignedAngle(Vector3.up, (focusPoint - focusPointClosestPoint).normalized, Vector3.Cross(Vector3.up, focusPointDirectionToZero.normalized));
 
-            Vector3 targetPointClosestPoint = ClosestPointOnCircle(focus.position, 512);
+            Vector3 targetPointClosestPoint = ClosestPointOnCircle(focus.position, radius);
             Vector3 targetPointDirectionToZero = - targetPointClosestPoint.normalized;
             float targetPointMagnitude = (focus.position - targetPointClosestPoint).magnitude;
 
