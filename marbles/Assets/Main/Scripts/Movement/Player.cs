@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -52,8 +53,7 @@ public class Player : MonoBehaviour
 
     MeshRenderer meshRenderer;
     
-    public bool IsInSpeedZone { get; set; }
-    public bool IsInSlowZone { get; set; }
+    public List<bool> SpeedSlowZones { get; set; } = new List<bool>();
 
     float forwardSpeedLastTick = 0;
 
@@ -112,17 +112,17 @@ public class Player : MonoBehaviour
 
     public float GetForwardSpeedFull()
     {
-        if (IsInSpeedZone)
+        if (SpeedSlowZones.Count == 0)
+        {
+            return midForwardSpeed;
+        }
+        else if (SpeedSlowZones.Contains(true))
         {
             return maxForwardSpeed;
         }
-        else if (IsInSlowZone)
-        {
-            return lowForwardSpeed;
-        }
         else
         {
-            return midForwardSpeed;
+            return lowForwardSpeed;
         }
     }
 
@@ -253,7 +253,7 @@ public class Player : MonoBehaviour
         {
             float backAcceleration;
 
-            if (IsInSlowZone)
+            if (SpeedSlowZones.Contains(false))
             {
                 backAcceleration = maxBackAccelerationInSlow;
             }

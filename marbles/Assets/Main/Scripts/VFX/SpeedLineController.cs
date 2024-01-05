@@ -22,13 +22,13 @@ public class SpeedLineController : MonoBehaviour
     {
         float speed = Vector3.Dot(rb.transform.forward, rb.velocity);
 
-        if (speed < 16)
+        if (speed < 22)
         {
             vfx.SetFloat("SpawnRate", 0);
         }
         else
         {
-            float t = Remap(speed, 16, 25, 0, 1);
+            float t = Remap(speed, 22, 35, 0, 1);
 
             float speedMin = Remap(t, 0, 1, 2f, 3.5f);
             Vector2 vfxSpeed = new Vector2(speedMin, speedMin * 1.5f);

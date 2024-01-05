@@ -55,13 +55,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.3
+    - _Alpha: 0.5
     - _Direction: -0.053
     - _Height: 60
     - _Opacity: 0.026
     - _Speed: 0.35
     - _Width: 60
     m_Colors:
-    - _BottomColor: {r: 0.040523257, g: 0.7924528, b: 0, a: 1}
-    - _TopColor: {r: 0.012208687, g: 0.2264151, b: 0, a: 0}
+    - _BottomColor: {r: 0.15143289, g: 0.7569538, b: 0.7830189, a: 1}
+    - _TopColor: {r: 0.023916136, g: 0, b: 0.2735849, a: 1}
   m_BuildTextureStacks: []

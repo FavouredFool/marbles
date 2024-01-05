@@ -15,11 +15,11 @@ public class TriggerZone : MonoBehaviour
 
         if (SpeedZone)
         {
-            player.IsInSpeedZone = true;
+            player.SpeedSlowZones.Add(true);
         }
         else
         {
-            player.IsInSlowZone = true;
+            player.SpeedSlowZones.Add(false);
         }
     }
 
@@ -28,7 +28,15 @@ public class TriggerZone : MonoBehaviour
         Player player = other.gameObject.GetComponent<Player>();
         if (player == null) return;
 
-        player.IsInSpeedZone = false;
-        player.IsInSlowZone = false;
+        if (SpeedZone)
+        {
+            player.SpeedSlowZones.Remove(true);
+        }
+        else
+        {
+            player.SpeedSlowZones.Remove(false);
+        }
+
+        
     }
 }
