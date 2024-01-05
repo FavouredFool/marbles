@@ -26,6 +26,9 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField, Range(0f, 1f)]
     float focusCentering = 0.999f;
 
+    [SerializeField, Range(0f, 100f)]
+    float cameraTurnResistance = 70;
+
     [SerializeField]
     AnimationCurve camRotationCurve;
 
@@ -58,11 +61,10 @@ public class OrbitCamera : MonoBehaviour
 
         float t = Mathf.Clamp01(Remap(upAngle, 0, maxAngleAbs, 0, 1));
         // At 1 -> push back with exactly as much angle as you get by rotating to the side
-        // MAGIC NUMBER
-        float maxHorizontalSpeed = 52;
+
 
         t = camRotationCurve.Evaluate(t);
-        float horizontalPushback = maxHorizontalSpeed * t;
+        float horizontalPushback = cameraTurnResistance * t;
 
         Vector3 lookAtPoint = focusPoint + focus.forward * cameraLookAtForwardOffset;
         Quaternion goalRotation = Quaternion.LookRotation(lookAtPoint - focusPoint, CustomGravity.GetUpAxis(focusPoint));

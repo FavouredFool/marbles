@@ -10,7 +10,7 @@ public class RaceManager : MonoBehaviour
     {
         if (_startTime == float.PositiveInfinity)
         {
-            Debug.Log("Start!");
+            //Debug.Log("Start!");
         }
         else
         {
