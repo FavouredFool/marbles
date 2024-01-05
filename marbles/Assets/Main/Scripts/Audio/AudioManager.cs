@@ -52,8 +52,8 @@ public class AudioManager : MonoBehaviour
 
         float ambientT = Mathf.Clamp01(Remap(currentSpeed, 22, 5, 0, 1));
         // This one keeps being at t = 1 even over 25
-        float drumT = Mathf.Clamp01(Remap(currentSpeed, 15, 25, 0, 1));
-        float fullT = Mathf.Clamp01(Remap(currentSpeed, 27, 35, 0, 1));
+        float drumT = Mathf.Clamp01(Remap(currentSpeed, 15, 28, 0, 1));
+        float fullT = Mathf.Clamp01(Remap(currentSpeed, 25.5f, 45, 0, 1));
 
         float totalT = ambientT + drumT + fullT;
 
