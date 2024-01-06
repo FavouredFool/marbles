@@ -45,6 +45,19 @@ public class OrbitCamera : MonoBehaviour
     private void Awake()
     {
         focusPoint = focus.position;
+        
+    }
+
+    public void Start()
+    {
+        Vector3 lookAtPoint = focusPoint + focus.forward * cameraLookAtForwardOffset;
+        Quaternion goalRotation = Quaternion.LookRotation(lookAtPoint - focusPoint, CustomGravity.GetUpAxis(focusPoint));
+        transform.rotation = goalRotation;
+
+        UpdateFocusPoint();
+        Vector3 lookDirection = Quaternion.AngleAxis(orbitAngle, focus.right) * focus.forward;
+        Vector3 lookPosition = focusPoint - lookDirection * distance;
+        transform.position = lookPosition;
     }
 
 

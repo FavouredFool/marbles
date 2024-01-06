@@ -57,6 +57,8 @@ public class Player : MonoBehaviour
 
     float forwardSpeedLastTick = 0;
 
+    bool allowStartRacing = false;
+
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
@@ -80,6 +82,11 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!allowStartRacing)
+        {
+            return;
+        }
+
         // find out speedstate
         float forwardSpeedFull = GetForwardSpeedFull();
 
@@ -310,5 +317,10 @@ public class Player : MonoBehaviour
     float GetMinDot(int layer)
     {
         return (stairsMask & (1 << layer)) == 0 ? minGroundDotProduct : minStairsDotProduct;
+    }
+
+    public void AllowStartRacing(bool startRacing)
+    {
+        allowStartRacing = startRacing;
     }
 }

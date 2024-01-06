@@ -7,7 +7,6 @@ using System;
 public class AudioManager : MonoBehaviour
 {
     public float totalBGVolume = 0.5f;
-    public Rigidbody playerRB;
     public Sound[] sounds;
 
     [Range(0.01f, 1)]
@@ -15,8 +14,20 @@ public class AudioManager : MonoBehaviour
 
     float currentSpeed = 0;
 
+    Rigidbody playerRB;
+
     private void Awake()
     {
+        AudioManager[] audioManagers;
+        audioManagers = FindObjectsOfType<AudioManager>();
+
+        if (audioManagers.Length > 1)
+        {
+            Destroy(gameObject);
+        }
+
+        DontDestroyOnLoad(gameObject);
+
         foreach (Sound s in sounds)
         {
             s.source = gameObject.AddComponent<AudioSource>();
@@ -38,6 +49,11 @@ public class AudioManager : MonoBehaviour
 
     public void Update()
     {
+        if (playerRB == null)
+        {
+            playerRB = FindObjectOfType<Player>().GetComponent<Rigidbody>();
+        }
+
         DynamicBGVolume();
     }
 
