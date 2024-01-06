@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class RaceManager : MonoBehaviour
 {
+    [SerializeField] Leaderboard leaderboard;
+
     float _startTime = float.PositiveInfinity;
 
     public void GoalReached()
@@ -15,7 +17,7 @@ public class RaceManager : MonoBehaviour
         else
         {
             float endTime = Time.time - _startTime;
-            Debug.Log($"Laptime: {endTime}");
+            leaderboard.AddScore(endTime);
         }
 
         _startTime = Time.time;
