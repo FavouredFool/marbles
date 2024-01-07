@@ -8,6 +8,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] Leaderboard leaderboard;
     [SerializeField] Timer timer;
     [SerializeField] Countdown countdown;
+    [SerializeField] Settings settings;
 
     public void StartRacing()
     {
@@ -24,5 +25,11 @@ public class MainMenu : MonoBehaviour
 #else
     Application.Quit();
 #endif
+    }
+
+    public void Settings()
+    {
+        settings.gameObject.SetActive(true);
+        gameObject.SetActive(false);
     }
 }
