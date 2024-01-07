@@ -8,6 +8,7 @@ public class RaceManager : MonoBehaviour
 
     float _startTime = float.PositiveInfinity;
     float _bestTime = float.PositiveInfinity;
+    float _lastRoundTime = float.PositiveInfinity;
 
     public void GoalReached()
     {
@@ -15,6 +16,8 @@ public class RaceManager : MonoBehaviour
         {
             float endTime = Time.time - _startTime;
             leaderboard.AddScore(endTime);
+
+            _lastRoundTime = endTime;
 
             if (endTime < _bestTime)
             {
@@ -33,5 +36,10 @@ public class RaceManager : MonoBehaviour
     public float GetBestTime()
     {
         return _bestTime;
+    }
+
+    public float GetLastRoundTime()
+    {
+        return _lastRoundTime;
     }
 }

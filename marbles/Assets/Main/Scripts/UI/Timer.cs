@@ -8,6 +8,7 @@ public class Timer : MonoBehaviour
     [SerializeField] RaceManager raceManager;
     [SerializeField] TMP_Text timerText;
     [SerializeField] TMP_Text bestTimeText;
+    [SerializeField] TMP_Text lastRoundText;
 
     public void Update()
     {
@@ -32,6 +33,18 @@ public class Timer : MonoBehaviour
         else
         {
             bestTimeText.text = "XX:XXX";
+        }
+
+
+        float lastRoundTime = raceManager.GetLastRoundTime();
+
+        if (lastRoundTime != float.PositiveInfinity && lastRoundTime != float.NegativeInfinity)
+        {
+            lastRoundText.text = lastRoundTime.ToString("00.000") + "s";
+        }
+        else
+        {
+            lastRoundText.text = "XX:XXX";
         }
 
         
