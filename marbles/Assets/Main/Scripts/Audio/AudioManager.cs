@@ -13,6 +13,12 @@ public class AudioManager : MonoBehaviour
     [Range(0.01f, 1)]
     public float BGMoveDelta = 0.1f;
 
+    public float engineMinPitch = 1.0f;
+    public float engineMaxPitch = 1.5f;
+
+    public float engineMinVolume = 0.75f;
+    public float engineMaxVolume = 1.25f;
+
     float currentSpeed = 0;
 
     Rigidbody playerRB;
@@ -47,6 +53,7 @@ public class AudioManager : MonoBehaviour
         Play("AmbientBG");
         Play("DrumBG");
         Play("FullBG");
+        Play("Engine");
     }
 
     public void Update()
@@ -57,6 +64,25 @@ public class AudioManager : MonoBehaviour
         }
 
         DynamicBGVolume();
+        DynamicEngineVolume();
+        
+    }
+
+    public void DynamicEngineVolume()
+    {
+        float speed = Vector3.Dot(playerRB.velocity, playerRB.transform.forward);
+        float pitch = Remap(speed, 0, 45, engineMinPitch, engineMaxPitch);
+        Pitch("Engine", pitch);
+
+        if (speed < 0.5f)
+        {
+            Volume("Engine", 0);
+        }
+        else
+        {
+            float volume = Remap(speed, 0, 45, engineMinVolume, engineMaxVolume);
+            Volume("Engine", volume);
+        }
     }
 
     public void DynamicBGVolume()
@@ -122,6 +148,18 @@ public class AudioManager : MonoBehaviour
         }
 
         s.source.volume = volume;
+    }
+
+    public void Pitch(string name, float pitch)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);
+        if (s == null)
+        {
+            Debug.LogWarning("Sound not found");
+            return;
+        }
+
+        s.source.pitch = pitch;
     }
 
     public AudioSource GetSound(string name)
