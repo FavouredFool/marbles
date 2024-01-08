@@ -53,7 +53,16 @@ public class Leaderboard : MonoBehaviour
             }
 
             line.nameField.text = searchedName;
-            line.timeField.text = searchedTime.ToString("00.000") + "s";
+
+            if (searchedTime == float.PositiveInfinity || searchedTime == float.NegativeInfinity)
+            {
+                line.timeField.text = "XX.XXX" + "s";
+            }
+            else
+            {
+                line.timeField.text = searchedTime.ToString("00.000") + "s";
+            }
+            
         }
     }
 
