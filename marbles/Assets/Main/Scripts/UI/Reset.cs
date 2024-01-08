@@ -8,5 +8,6 @@ public class Reset : MonoBehaviour
     public void ResetScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        FindObjectOfType<AudioManager>().Play("Menu");
     }
 }

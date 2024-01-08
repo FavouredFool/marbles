@@ -10,6 +10,13 @@ public class MainMenu : MonoBehaviour
     [SerializeField] Countdown countdown;
     [SerializeField] GameObject settingsVisuals;
 
+    AudioManager audioManager;
+
+    public void Awake()
+    {
+        audioManager = FindObjectOfType<AudioManager>();
+    }
+
     public void StartRacing()
     {
         reset.gameObject.SetActive(true);
@@ -17,6 +24,7 @@ public class MainMenu : MonoBehaviour
         leaderboard.ToggleVisuals(false);
         timer.gameObject.SetActive(true);
         countdown.gameObject.SetActive(true);
+        audioManager.Play("Menu");
     }
     public void Quit()
     {
@@ -25,11 +33,15 @@ public class MainMenu : MonoBehaviour
 #else
     Application.Quit();
 #endif
+
+        audioManager.Play("Menu");
     }
 
     public void Settings()
     {
         settingsVisuals.SetActive(true);
         gameObject.SetActive(false);
+
+        audioManager.Play("Menu");
     }
 }

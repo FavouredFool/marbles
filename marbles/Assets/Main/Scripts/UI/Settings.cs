@@ -10,6 +10,7 @@ public class Settings : MonoBehaviour
     [SerializeField] MainMenu mainMenu;
     [SerializeField] AudioMixer audioMixer;
     [SerializeField] string fileName = "Settings";
+    [SerializeField] GameObject visuals;
 
     [SerializeField] Toggle fullscreenToggle;
     [SerializeField] Slider volumeSlider;
@@ -17,10 +18,12 @@ public class Settings : MonoBehaviour
     SettingsSerialized settings;
     string dataPath;
 
+    AudioManager audioManager;
 
     public void Awake()
     {
         settings = new();
+        audioManager = FindObjectOfType<AudioManager>();
     }
 
     public void Start()
@@ -62,7 +65,8 @@ public class Settings : MonoBehaviour
     public void Back()
     {
         mainMenu.gameObject.SetActive(true);
-        gameObject.SetActive(false);
+        visuals.SetActive(false);
+        audioManager.Play("Menu");
     }
 
     public void Quit()
@@ -72,5 +76,7 @@ public class Settings : MonoBehaviour
 #else
     Application.Quit();
 #endif
+
+        audioManager.Play("Menu");
     }
 }
