@@ -6,6 +6,7 @@ using System;
 
 public class AudioManager : MonoBehaviour
 {
+    public AudioMixerGroup audioMixerGroup;
     public float totalBGVolume = 0.5f;
     public Sound[] sounds;
 
@@ -37,6 +38,7 @@ public class AudioManager : MonoBehaviour
             s.source.loop = s.loop;
 
             s.source.playOnAwake = false;
+            s.source.outputAudioMixerGroup = audioMixerGroup;
         }
     }
 
